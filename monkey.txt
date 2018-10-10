@@ -1,0 +1,161 @@
+monkey压力测试-Android压力测试
+测试步骤：
+1.安装ADB
+2.连接被测手机和电脑
+3.打开CMD命令行
+4.输入monkey命令
+adb shell monkey -p your.package.name --pct-touch 30 --ignore-crashes --ignore-timeouts--throttle 250 -s 2 -v -v -v 500 0000  指定包名为your.package.name，指定触摸事件占30%，忽略崩溃，忽略超时，每个事件间隔250ms，输出最详细日志，执行5000000万次
+
+一、monkey测试命令有哪些选项？
+
+1、常用选项
+
+	--help 打印帮助信息
+
+	-v     指定打印信息的详细级别，一个v增加一个级别,默认级别为0，-v -v -v为最详细日志
+
+2、事件选项 
+	-s 指定产生随机事件种子值，相同的种子值产生相同的事件序列 如： -s 200
+
+	--throttle 每个事件结束后的间隔时间——降低系的压力(如不指定，系统会尽快的发送事件序列)，如：--throttle 100
+
+	--pct-touch 指定触摸事件的百分比，如：--pct-touch 5%，相关的还有以下option:
+	--pct-motion<percent> 滑动事件
+	--pct-trackball<percent> 轨迹球事件
+	--pct-nav<percent> 导航事件up/down/left/right
+	--pct-majornav<percent> 主要导航事件back key、menu key
+	--pct-syskeys<percent> 系统按键事件Home/startCall、endCall、volumeControl
+	--pct-appswitch<percent> Activity之间的切换
+	--pct-anyevent<percent> 任意事件
+
+3、约束选项
+ 
+	-p 指定有效的Package(如不指定，则对系统中所有package有效)，一个-p对应一个有效package，如：-p com.ckt -p com.ckt.asura;
+
+4、调试选项
+ 	
+	--dbg-no-events 初始化启动的activity，但不产生任何事件
+	--hprof	指定该项后在事件序列发送前后会立即生成分析报告——一般建议指定该项
+	--ignore-crashes 忽略崩溃
+	--ignore-timeouts 忽略超时
+	--ignore-security-exceptions 忽略安全异常
+	--kill-process-after-erro 发生错误后直接杀掉进程
+	--monitor-native-crashes 跟踪本地方法的崩溃问题
+	--wait-dbg 知道连接了调试器才执行monkey测试
+
+二、一个完整的monkey语句？
+
+adb shell monkey -p your.package.name --pact-touch 30 --ignore-crashes --ignore-timeouts--throttle 250 -s 2 -v -v -v 5000000 触摸事件占30%，忽略崩溃和超时，每个事件间隔250ms，输出最详细日志，执行5000000万次 
+
+三、如何保存不连接电脑跑monkey？
+
+1.输入命令进入shell环境：adb shell
+2.输入monkey语句执行：monkey –p com.android.mms –s 100 --throttle 1000 –v –v –v 15000 > /mnt/sdcard/monkey_test.txt&
+
+四、如何跑多个apk的monkey?
+
+黑名单：执行除了黑名单中以外的apk
+白名单：只执行在白名单中的apk
+黑名单的设置方法：
+a、创建一个名称为blacklist的txt文档，在文件中输入应用程度的包名，如mms应用，则在文件中输入com.android.mms；如果有多个应用程序不想被执行，则在文件中添加多个包名，注意包名与包名之间均用回车键；
+b、将blacklist.txt的文件导入到手机的/data目录下，然后在执行monkey测试的时候使用--pkg-blacklist-file参数再加上blacklist文件的存储路径，其他的参数设置则和测试单一apk没有区别
+白名单的设置方法：
+白名单的设置方法和黑名单的设置方法基本一致，只是在创建txt文档的时候，文件的名称应为whitelist,在执行monkey的时候，只执行白名单中的应用
+例子：
+
+monkey -pkg-blacklist-file /data/blacklisttxt -c <options> -s <seed> <限制语句> --throttle <milliseconds> -v 执行次数 > C:\blacklist_test.txt//执行黑名单以外的应用
+
+monkey -pkg-whitelist-file /data/whitelist.txt -c <options> -s <seed> <限制语句> --throttle<milliseconds> -v 执行次数 > C:\whitelist_test.txt//执行白名单的应用
+
+五、如何关闭monkey
+
+1. ps命令查找uiautomator的进程
+cmd命令行窗口输入：
+
+（linux）adb
+ shell ps | grep monkey?
+
+（windows）adb
+ shell ps | findstr monkey
+返回来的第一个数字，即是monkey的进程号
+
+2.kill 命令结束进程
+继续输入:
+?adb shell kill [刚才查到的进程号]
+
+六、如何分析Monkey日志
+
+1、 ANR问题：在日志中搜索“ANR”
+2、 崩溃问题：在日志中搜索“CRASH”
+
+七、如何重现BUG
+
+1、找到是monkey里面的哪个地方出错
+
+2、?查看Monkey里面出错前的一些事件动作，并手动执行该动作
+
+3、?若以上步骤还不能找出，可以使用之前执行的monkey命令再执行一遍，注意seed值要一样
+
+
+
+八、monke的测试策略？
+
+
+
+1、单个apk的验收测试时，使用单一apk且不忽略异常的命令执行
+
+
+2、单个apk的解决问题的测试时，使用单一apk且忽略异常的命令执行。这样可以在一次执行的过程中发现应用程序中的多个问题。
+
+
+3、单个apk的应用程序的压力/健壮性测试时，主要缩短monkey测试中事件与事件之间的延迟时间，验证在快速的事件响应的过程中，程序是否能正常运行。将--throttle的值设定为500或者更小，一般都使用500毫秒的延迟事件。
+
+
+在进行apk的集合测试（测试对象为多个APP，手机测试？）时，对于高频率使用的apk、长时间使用的apk都要包含在执行的应用程序中间。
+
+
+
+APK分类具体：
+
+
+高频率使用的apk如：Phone、Contacts、Message、Settings、File Manager、Gallery、Input Method
+
+
+长时间使用的apk如：Phone、Browser、Music player、Camera、Video player、Email、Chat
+
+
+其他的apk如：Calendar、Notepad、Calculator、FM Radio、Google?Search
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

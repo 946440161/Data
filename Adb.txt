@@ -1,0 +1,31 @@
+1、adb version 验证adb已经安装以及安装版本
+2、adb help    显示支持的所有命令及介绍
+3、adb devices 显示当前所有连接的安卓设备/虚拟机(已连接数据线而未显示设备，则需要开启手机调试模式)
+4、adb install [Path] 安装APK
+5、adb install -r [Path] 覆盖安装apk
+6、adb uninstall [Package_name]用于卸载
+7、adb logcat 查看log
+8、adb logcat -c 清空之前所有的log
+9、adb logcat [findstr/grep][filter] 消息过滤
+10、adb remount 打开设备权限
+11、adb push [local_path][remote_path] 将本电脑文件复制到设备中
+12、adb pull [remote_path][local_path] 将设备文件复制到本地电脑中
+13、adb shell 登录设备
+14、ls data/data | grep [name] 获取包名，如果不知道包的大概名字，则直接用ls data/data获取全部包名
+15、top | grep [Package_name] 获取app CPU内存使用情况
+16、adb -s [device_name][...] 电脑连接到多台设备时，adb命令指定设备
+monkey常用参数
+
+:
+	-p   指定包名(所有命令都在此包内执行，如不指定，则在整个系统内执行)
+	-v   log详细程度(最高支持‘-v-v-v’最详细)
+	-s   种子(指定种子后，同一条命令在任意时间、地点的执行顺序都相同)? 
+
+	--throttle 单步延时(每个步骤操作间隔，单位毫秒)
+	--kill-process-after-erro 出错时杀掉进程
+
+        --ignore-timeouts 忽略超时错误
+        --ignore-security-exceptions 忽略许可错误
+举例：
+adb shell monkey -p com.motk -v -v -v -s 12 --throttle 5001000  指定包名为com.motk、log详细程度最高、随即数种子为12，单步间隔不500ms,总计执行1000步
+注：在加了-s命令后，为保证后续同一条命令得出同样结果，在执行命令前，设备的状态必须相同如（已登录app，并停留在主界面）
